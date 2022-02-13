@@ -33,3 +33,8 @@ stdlib:
 	@if [ ! -d "out/std" ]; then mkdir out/std; fi
 	bcc -ansi -c -o out/std/std_opr.o src/c/std_opr.c
 	bcc -ansi -c -o out/std/std_lib.o src/c/std_lib.c
+
+run:
+	sudo bochs -f src/config/if2230.config
+
+build-run: all run

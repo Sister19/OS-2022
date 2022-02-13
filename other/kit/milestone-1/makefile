@@ -13,3 +13,8 @@ kernel:
 
 stdlib:
 	# Opsional
+
+run:
+	sudo bochs -f src/config/if2230.config
+
+build-run: all run
