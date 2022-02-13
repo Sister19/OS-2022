@@ -1,7 +1,7 @@
 // Implementasi tipe data umum
 
-#ifndef _STD_DATATYPE_H
-#define _STD_DATATYPE_H
+#ifndef _STD_TYPE_H
+#define _STD_TYPE_H
 
 typedef char bool;
 #define true 1
