@@ -11,7 +11,7 @@ extern void makeInterrupt21();
 void handleInterrupt21(int AX, int BX, int CX, int DX);
 
 
-// TODO : Implementasikan
+// Implementasikan
 void printString(char *string);
 void readString(char *string);
 void clearScreen();

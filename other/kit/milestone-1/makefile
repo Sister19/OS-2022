@@ -12,4 +12,4 @@ kernel:
 	# TODO : Tambahkan untuk pembuatan kernel
 
 stdlib:
-	# TODO : Tambahkan untuk pembuatan operasi umum
+	# Opsional
