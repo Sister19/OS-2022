@@ -3,10 +3,10 @@
 #include "std_datatype.h"
 #include "std_lib.h"
 
-extern void putInMemory(int segment, int address, char character);
+extern void putInMemory(int segment, int address, byte b);
 extern int interrupt(int int_number, int AX, int BX, int CX, int DX);
+extern void makeInterrupt21();
 
-void makeInterrupt21();
 void fillKernelMap();
 void handleInterrupt21(int AX, int BX, int CX, int DX);
 void printString(char *string);
