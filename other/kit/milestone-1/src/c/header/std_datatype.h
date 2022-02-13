@@ -3,10 +3,10 @@
 #ifndef _STD_DATATYPE_H
 #define _STD_DATATYPE_H
 
-typedef bool char;
+typedef char bool;
 #define true 1
 #define false 0
 
-typedef byte unsigned char;
+typedef unsigned char byte;
 
 #endif
