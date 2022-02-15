@@ -20,6 +20,9 @@ void fillKernelMap() {
     for (i = 0; i < 16; i++)
         map_fs_buffer.is_filled[i] = true;
 
+    for (i = 256; i < 512; i++)
+        map_fs_buffer.is_filled[i] = true;
+
     writeSector(&map_fs_buffer, FS_MAP_SECTOR_NUMBER);
 }
 
@@ -83,14 +86,14 @@ void readSector(byte *buffer, int sector_number) {
     sector   = mod(sector_number, 18) + 1;  // CH
 
     head  = mod(div(sector_number, 18), 2) << 8; // DH
-    drive = 0x00; // DL
+    drive = 0x00;                                // DL
 
     interrupt(
-        0x13, // Interrupt number
+        0x13,                       // Interrupt number
         0x0200 | sector_read_count, // AX
-        buffer, // BX
-        cylinder | sector, // CX
-        head | drive // DX
+        buffer,                     // BX
+        cylinder | sector,          // CX
+        head | drive                // DX
     );
 }
 
