@@ -33,20 +33,37 @@ void tc_A(byte buf[2880][512]) {
 }
 
 void tc_B(byte buf[2880][512]) {
-    if (buf[0][0] == 0) {
-        printf("hoopla");
+    insert_file(buf, "file_src/tc_b/file_idx_0", 0xFF);
+    create_folder(buf, "folder1", 0xFF);
+    for (int i = 1; i < 62; i++) {
+        char str_buf[16];
+        sprintf(str_buf, "folder%d", i + 1);
+        create_folder(buf, str_buf, i);
     }
+    insert_file(buf, "file_src/tc_b/file_idx_63", 0xFF);
 }
 
 void tc_C(byte buf[2880][512]) {
-    if (buf[0][0] == 0) {
-        printf("hoopla");
-    }
+    create_folder(buf, "HD", 0xFF);
+    create_folder(buf, "HR", 0);
+    create_folder(buf, "FD", 1);
+    create_folder(buf, "FD", 0xFF);
+
+    create_folder(buf, "DT", 0);
+    create_folder(buf, "HR", 4);
+    create_folder(buf, "EZ", 0xFF);
+    create_folder(buf, "HD", 6);
+    create_folder(buf, "DT", 7);
+    create_folder(buf, "FL", 8);
 }
 
 void tc_D(byte buf[2880][512]) {
-    if (buf[0][0] == 0) {
-        printf("hoopla");
+    insert_file(buf, "file_src/tc_d/512", 0xFF);
+    insert_file(buf, "file_src/tc_d/1024", 0xFF);
+    for (int i = 0; i < 14; i++) {
+        char str_buf[32];
+        sprintf(str_buf, "file_src/tc_d/8192_%d", i + 1);
+        insert_file(buf, str_buf, 0xFF);
     }
 }
 

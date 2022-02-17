@@ -400,9 +400,9 @@ void shell() {
         else if (!strcmp(input_buffer, "cat")) {
             struct file_metadata file_target;
             enum fs_retcode ret_code;
-            byte cat_buffer[2048];
+            byte cat_buffer[8192];
 
-            clear(cat_buffer, 2048);
+            clear(cat_buffer, 8192);
             file_target.buffer       = cat_buffer;
             file_target.node_name    = input_buffer + 4;
             file_target.parent_index = current_directory;
