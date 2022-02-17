@@ -305,6 +305,7 @@ void read(struct file_metadata *metadata, enum fs_retcode *return_code) {
 
             for (i = 0; i < 16; i++) {
                 byte sector_number_to_read = sector_entry_buffer.sector_numbers[i];
+
                 if (sector_number_to_read != 0x00)
                     readSector(metadata->buffer + i*512, sector_number_to_read);
                 else
@@ -402,6 +403,7 @@ void shell() {
             byte cat_buffer[2048];
 
             clear(cat_buffer, 2048);
+            file_target.buffer       = cat_buffer;
             file_target.node_name    = input_buffer + 4;
             file_target.parent_index = current_directory;
             read(&file_target, &ret_code);
