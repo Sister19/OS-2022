@@ -17,8 +17,19 @@ extern void create_folder(byte buf[2880][512], char *fname, byte parent_idx);
 void tc_A(byte buf[2880][512]) {
     create_folder(buf, "folder1", 0xFF);
     create_folder(buf, "folder2", 0);
-    create_folder(buf, "folder3", 1);
-    insert_file(buf, "../other/hehe", 0xFF);
+    create_folder(buf, "folder3", 0);
+    insert_file(buf, "file_src/tc_a/hehe", 2);
+    insert_file(buf, "file_src/tc_a/haha", 2);
+    insert_file(buf, "file_src/tc_a/hoho", 2);
+    create_folder(buf, "folder4", 0);
+    create_folder(buf, "folder5", 6);
+    insert_file(buf, "file_src/tc_a/keos", 6);
+    insert_file(buf, "file_src/tc_a/keoskeos", 6);
+
+    insert_file(buf, "file_src/tc_a/file3", 0);
+    insert_file(buf, "file_src/tc_a/file1", 0);
+    insert_file(buf, "file_src/tc_a/file2", 0);
+    insert_file(buf, "file_src/tc_a/file_luar", 0xFF);
 }
 
 void tc_B(byte buf[2880][512]) {
