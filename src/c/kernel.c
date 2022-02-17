@@ -434,10 +434,7 @@ void shell() {
 
 
 void handleInterrupt21(int AX, int BX, int CX, int DX) {
-    byte AL, AH;
-    AL = (char) (AX);
-    AH = (char) (AX >> 8);
-    switch (AL) {
+    switch (AX) {
         case 0x0:
             printString(BX);
             break;
