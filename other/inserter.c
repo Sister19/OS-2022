@@ -177,15 +177,15 @@ void writer(byte buf[2880][512], struct file_metadata *metadata) {
 
     // Tahap 7 : Return code error
     if (!unique_filename)
-        printf("Error : File already exist\n");
+        fprintf(stderr, "Error : Name already exist\n");
     else if (!node_write_index_found)
-        printf("Error : Maximum node entry reached\n");
+        fprintf(stderr, "Error : Maximum node entry reached\n");
     else if (writing_file && !sector_write_index_found)
-        printf("Error : Maximum sector entry reached\n");
+        fprintf(stderr, "Error : Maximum sector entry reached\n");
     else if (invalid_parent_index)
-        printf("Error : Invalid parent index\n");
+        fprintf(stderr, "Error : Invalid parent index\n");
     else if (!enough_empty_space)
-        printf("Error : Not enough space\n");
+        fprintf(stderr, "Error : Not enough space\n");
 }
 
 
@@ -197,6 +197,11 @@ void insert_file(byte buf[2880][512], char *fname, byte parent_idx) {
     metadata.parent_index = parent_idx;
 
     FILE *ptr = fopen(fname, "rb");
+    if (ptr == NULL) {
+        fprintf(stderr, "Error : \"%s\" not found\n", fname);
+        return;
+    }
+
     metadata.file_ptr = ptr;
     byte temp[8190];
     fread(temp, 8192, 1, ptr);

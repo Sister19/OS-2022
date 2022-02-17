@@ -1,8 +1,8 @@
 all: testcase_gen
 
 inserter:
-	gcc -Wall -Wextra -c inserter.c
-	strip --strip-unneeded inserter.o
+	gcc -Wall -Wextra -c inserter.c -o tc_lib
+	strip --strip-unneeded tc_lib
 
 testcase_gen: inserter
-	gcc -Wall -Wextra tc_gen.c inserter.o -o tc_gen
+	gcc -Wall -Wextra tc_gen.c tc_lib -o tc_gen
