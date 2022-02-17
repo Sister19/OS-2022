@@ -193,7 +193,7 @@ void writer(byte buf[2880][512], struct file_metadata *metadata) {
 // Fungsi wrapper
 void insert_file(byte buf[2880][512], char *fname, byte parent_idx) {
     struct file_metadata metadata;
-    metadata.node_name    = fname;
+
     metadata.parent_index = parent_idx;
 
     FILE *ptr = fopen(fname, "rb");
@@ -201,6 +201,23 @@ void insert_file(byte buf[2880][512], char *fname, byte parent_idx) {
         fprintf(stderr, "Error : \"%s\" not found\n", fname);
         return;
     }
+
+    // Relative path, filename resolve
+    int slash_idx = -1;
+    int i = 0;
+    while (fname[i] != '\0') {
+        if (fname[i] == '/' || fname[i] == '\\')
+            slash_idx = i;
+        i++;
+    }
+
+    char filename[128];
+    if (slash_idx != -1)
+        strcpy(filename, fname + slash_idx + 1);
+    else
+        strcpy(filename, fname);
+
+    metadata.node_name = filename;
 
     metadata.file_ptr = ptr;
     byte temp[8190];

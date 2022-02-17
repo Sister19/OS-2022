@@ -7,7 +7,8 @@
 
 typedef unsigned char byte;
 
-// Link dengan inserter.o
+// Link dengan tc_lib
+// insert_file & create_folder menerima relative pathing
 extern void insert_file(byte buf[2880][512], char *fname, byte parent_idx);
 extern void create_folder(byte buf[2880][512], char *fname, byte parent_idx);
 
@@ -17,7 +18,7 @@ void tc_A(byte buf[2880][512]) {
     create_folder(buf, "folder1", 0xFF);
     create_folder(buf, "folder2", 0);
     create_folder(buf, "folder3", 1);
-    insert_file(buf, "q", 0xFF);
+    insert_file(buf, "../other/hehe", 0xFF);
 }
 
 void tc_B(byte buf[2880][512]) {
