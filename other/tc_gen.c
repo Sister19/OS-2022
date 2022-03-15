@@ -44,17 +44,17 @@ void tc_B(byte buf[2880][512]) {
 }
 
 void tc_C(byte buf[2880][512]) {
-    create_folder(buf, "HD", 0xFF);
-    create_folder(buf, "HR", 0);
-    create_folder(buf, "FD", 1);
-    create_folder(buf, "FD", 0xFF);
+    create_folder(buf, "A", 0xFF);
+    create_folder(buf, "test", 0);
+    create_folder(buf, "A11", 1);
+    create_folder(buf, "B", 0xFF);
 
-    create_folder(buf, "DT", 0);
-    create_folder(buf, "HR", 4);
-    create_folder(buf, "EZ", 0xFF);
-    create_folder(buf, "HD", 6);
-    create_folder(buf, "DT", 7);
-    create_folder(buf, "FL", 8);
+    create_folder(buf, "A2", 0);
+    create_folder(buf, "test", 4);
+    create_folder(buf, "C", 0xFF);
+    create_folder(buf, "C1", 6);
+    create_folder(buf, "C11", 7);
+    create_folder(buf, "test", 8);
 }
 
 void tc_D(byte buf[2880][512]) {
