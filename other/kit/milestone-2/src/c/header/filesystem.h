@@ -49,13 +49,14 @@ struct file_metadata {
 
 // Untuk error code write & read
 enum fs_retcode {
-    FS_UNKNOWN_ERROR,
-    FS_SUCCESS,
-    FS_R_NODE_NOT_FOUND,
-    FS_R_TYPE_IS_FOLDER,
+    FS_UNKNOWN_ERROR    = -1,
+    FS_SUCCESS          = 0,
+    FS_R_NODE_NOT_FOUND = 1,
+    FS_R_TYPE_IS_FOLDER = 2,
 
-    FS_W_FILE_ALREADY_EXIST,
-    FS_W_MAXIMUM_NODE_ENTRY,
-    FS_W_MAXIMUM_SECTOR_ENTRY,
-    FS_W_INVALID_FOLDER
+    FS_W_FILE_ALREADY_EXIST   = 3,
+    FS_W_NOT_ENOUGH_STORAGE   = 4,
+    FS_W_MAXIMUM_NODE_ENTRY   = 5,
+    FS_W_MAXIMUM_SECTOR_ENTRY = 6,
+    FS_W_INVALID_FOLDER       = 7
 };
