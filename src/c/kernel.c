@@ -436,16 +436,54 @@ void shell() {
             readSector(&(node_fs_buffer.nodes[32]), FS_NODE_SECTOR_NUMBER + 1);
         }
         else if (!strcmp(input_buffer, "mv")) {
-            int first_arg_offset = i;
+            int first_arg_offset = 3;
             i = 0;
-            while (i < 128 && input_buffer[3+i] != '\0')
+            while (3+i < 128 && input_buffer[3+i] != '\0')
                 i++;
 
-            if (i != 128) {
-                // Suffering kuli
+            if (i < 128) {
+                int second_arg_offset = 3 + i + 1;
+                bool first_name_match = false;
+                for (i = 0; i < 64 && !first_name_match; i++) {
+                    if (node_fs_buffer.nodes[i].parent_node_index == current_directory
+                          && !strcmp(node_fs_buffer.nodes[i].name, input_buffer + first_arg_offset))
+                        first_name_match = true;
+                }
 
-                // writeSector(&(node_fs_buffer.nodes[0]),  FS_NODE_SECTOR_NUMBER);
-                // writeSector(&(node_fs_buffer.nodes[32]), FS_NODE_SECTOR_NUMBER + 1);
+                if (first_name_match) {
+                    int idx = i - 1;
+                    int j;
+                    if (input_buffer[second_arg_offset] == '/')
+                        node_fs_buffer.nodes[idx].parent_node_index = FS_NODE_P_IDX_ROOT;
+                    else if (input_buffer[second_arg_offset] == '.'
+                              && input_buffer[second_arg_offset+1] == '.'
+                              && current_directory != FS_NODE_P_IDX_ROOT) {
+                        node_fs_buffer.nodes[idx].parent_node_index = node_fs_buffer.nodes[current_directory].parent_node_index;
+                    }
+                    else {
+                        bool second_name_match = false;
+
+                        i = 0;
+                        while (second_arg_offset+i < 128 && input_buffer[second_arg_offset+i] != '\0')
+                            i++;
+
+                        // for (i = 0; i < 64 && !second_name_match; i++) {
+                        //     if (node_fs_buffer.nodes[i].parent_node_index == current_directory
+                        //           && !strcmp(node_fs_buffer.nodes[i].name, input_buffer + second_arg_offset))
+                        //         second_name_match = true;
+                        // }
+                    }
+
+                    for (j = 0; j < 14; j++)
+                        node_fs_buffer.nodes[idx].name[j] = '\0';
+
+                    strcpy(node_fs_buffer.nodes[idx].name, input_buffer + second_arg_offset);
+                }
+                else
+                    printString("mv: source not found\r\n");
+
+                writeSector(&(node_fs_buffer.nodes[0]),  FS_NODE_SECTOR_NUMBER);
+                writeSector(&(node_fs_buffer.nodes[32]), FS_NODE_SECTOR_NUMBER + 1);
             }
             else
                 printString("mv: invalid destination\r\n");
@@ -468,10 +506,10 @@ void shell() {
                 printString("cp: read error\r\n");
             else {
                 i = 0;
-                while (i < 128 && input_buffer[3+i] != '\0')
+                while (3+i < 128 && input_buffer[3+i] != '\0')
                     i++;
 
-                if (i != 128) {
+                if (i < 128) {
                     meta_temp.node_name = input_buffer + 3 + i + 1;
                     write(&meta_temp, &ret_code);
 
