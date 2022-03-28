@@ -165,6 +165,7 @@ void write(struct file_metadata *metadata, enum fs_retcode *return_code) {
         writing_file = false;
 
     // Tahap 4 : Pengecekan ukuran untuk file
+    // TODO : Pengecekan 8192+
     if (writing_file) {
         readSector(map_fs_buffer.is_filled, FS_MAP_SECTOR_NUMBER);
         enough_empty_space = false;
@@ -363,8 +364,8 @@ void shell() {
 
         for (i = 0; i < 128; i++) {
             if (input_buffer[i] == '\r'
-                || input_buffer[i] == '\n'
-                || input_buffer[i] == ' ')
+                  || input_buffer[i] == '\n'
+                  || input_buffer[i] == ' ')
                 input_buffer[i] = '\0';
         }
 
@@ -379,8 +380,8 @@ void shell() {
                     if (node_fs_buffer.nodes[i].parent_node_index == current_directory           // Pastikan pada curdir sama
                           && node_fs_buffer.nodes[i].sector_entry_index == FS_NODE_S_IDX_FOLDER  // Pastikan folder bukan file
                           && !strcmp(input_buffer + 3, node_fs_buffer.nodes[i].name)) {
-                            current_directory = i;
-                            folder_found = true;
+                        current_directory = i;
+                        folder_found = true;
                     }
                 }
                 if (!folder_found)
@@ -424,6 +425,42 @@ void shell() {
                 printString("mkdir: folder created\r\n");
             else
                 printString("mkdir: error\r\n");
+
+            readSector(&(node_fs_buffer.nodes[0]),  FS_NODE_SECTOR_NUMBER);
+            readSector(&(node_fs_buffer.nodes[32]), FS_NODE_SECTOR_NUMBER + 1);
+        }
+        else if (!strcmp(input_buffer, "cp")) {
+            byte cp_buf[8192];
+            struct file_metadata meta_temp;
+            enum fs_retcode ret_code;
+            int i = 0;
+            for (i = 0; i < 8192; i++)
+                cp_buf[i] = 0;
+
+            meta_temp.buffer       = cp_buf;
+            meta_temp.node_name    = input_buffer + 3;
+            meta_temp.filesize     = 0;
+            meta_temp.parent_index = current_directory;
+            read(&meta_temp, &ret_code);
+
+            if (ret_code != FS_SUCCESS)
+                printString("cp: read error\r\n");
+            else {
+                i = 0;
+                while (i < 128 && input_buffer[3+i] != '\0')
+                    i++;
+
+                if (i != 128) {
+                    meta_temp.node_name = input_buffer + 3 + i + 1;
+                    meta_temp.filesize  = 8192;
+                    write(&meta_temp, &ret_code);
+
+                    if (ret_code != FS_SUCCESS)
+                        printString("cp: write error\r\n");
+                }
+                else
+                    printString("cp: invalid destination\r\n");
+            }
 
             readSector(&(node_fs_buffer.nodes[0]),  FS_NODE_SECTOR_NUMBER);
             readSector(&(node_fs_buffer.nodes[32]), FS_NODE_SECTOR_NUMBER + 1);
