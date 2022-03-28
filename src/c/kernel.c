@@ -461,23 +461,54 @@ void shell() {
                         node_fs_buffer.nodes[idx].parent_node_index = node_fs_buffer.nodes[current_directory].parent_node_index;
                     }
                     else {
-                        bool second_name_match = false;
-
+                        bool slash_found       = false;
+                        // Searching for slash
                         i = 0;
-                        while (second_arg_offset+i < 128 && input_buffer[second_arg_offset+i] != '\0')
-                            i++;
 
-                        // for (i = 0; i < 64 && !second_name_match; i++) {
-                        //     if (node_fs_buffer.nodes[i].parent_node_index == current_directory
-                        //           && !strcmp(node_fs_buffer.nodes[i].name, input_buffer + second_arg_offset))
-                        //         second_name_match = true;
-                        // }
+                        while (second_arg_offset+i < 128
+                              && !slash_found
+                              && input_buffer[second_arg_offset+i] != '\0') {
+                            if (input_buffer[second_arg_offset+i] == '/')
+                                slash_found = true;
+                            else
+                                i++;
+                        }
+
+                        if (slash_found) {
+                            char folder_name[14];
+                            int slash_idx  = second_arg_offset + i + 1;
+                            int parent_idx = -1;
+
+                            for (i = 0; i < 14; i++)
+                                folder_name[i] = '\0';
+
+                            memcpy(folder_name, input_buffer + second_arg_offset, slash_idx - second_arg_offset - 1);
+
+                            for (i = 0; i < 64 && parent_idx == -1; i++) {
+                                if (node_fs_buffer.nodes[i].parent_node_index == current_directory
+                                      && !strcmp(node_fs_buffer.nodes[i].name, folder_name)) {
+                                    parent_idx = i;
+                                }
+                            }
+
+                            if (parent_idx != -1) {
+                                node_fs_buffer.nodes[idx].parent_node_index = parent_idx;
+                                second_arg_offset                           = slash_idx;
+                            }
+                            else {
+                                printString("mv: destination folder not found\r\n");
+                                second_arg_offset = -1;
+                            }
+
+                        }
                     }
 
-                    for (j = 0; j < 14; j++)
+                    if (second_arg_offset >= 0) {
+                        for (j = 0; j < 14; j++)
                         node_fs_buffer.nodes[idx].name[j] = '\0';
 
-                    strcpy(node_fs_buffer.nodes[idx].name, input_buffer + second_arg_offset);
+                        strcpy(node_fs_buffer.nodes[idx].name, input_buffer + second_arg_offset);
+                    }
                 }
                 else
                     printString("mv: source not found\r\n");
