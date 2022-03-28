@@ -263,6 +263,8 @@ void write(struct file_metadata *metadata, enum fs_retcode *return_code) {
     else if (!node_write_index_found)
         *return_code = FS_W_MAXIMUM_NODE_ENTRY;
     else if (writing_file && !enough_empty_space)
+        *return_code = FS_W_NOT_ENOUGH_STORAGE;
+    else if (writing_file && !sector_write_index_found)
         *return_code = FS_W_MAXIMUM_SECTOR_ENTRY;
     else if (invalid_parent_index)
         *return_code = FS_W_INVALID_FOLDER;
@@ -296,6 +298,7 @@ void read(struct file_metadata *metadata, enum fs_retcode *return_code) {
         else {
             struct sector_filesystem sector_fs_buffer;
             struct sector_entry sector_entry_buffer;
+            int sector_count = 0;
             readSector(&(sector_fs_buffer.sector_list[0]), FS_SECTOR_SECTOR_NUMBER);
 
             memcpy(
@@ -307,12 +310,15 @@ void read(struct file_metadata *metadata, enum fs_retcode *return_code) {
             for (i = 0; i < 16; i++) {
                 byte sector_number_to_read = sector_entry_buffer.sector_numbers[i];
 
-                if (sector_number_to_read != 0x00)
+                if (sector_number_to_read != 0x00) {
+                    sector_count++;
                     readSector(metadata->buffer + i*512, sector_number_to_read);
+                }
                 else
                     break; // Sector_number == 0 -> Tidak valid, selesaikan pembacaan
             }
 
+            metadata->filesize = sector_count*512;
             *return_code = FS_SUCCESS;
         }
     }
@@ -429,11 +435,26 @@ void shell() {
             readSector(&(node_fs_buffer.nodes[0]),  FS_NODE_SECTOR_NUMBER);
             readSector(&(node_fs_buffer.nodes[32]), FS_NODE_SECTOR_NUMBER + 1);
         }
+        else if (!strcmp(input_buffer, "mv")) {
+            int first_arg_offset = i;
+            i = 0;
+            while (i < 128 && input_buffer[3+i] != '\0')
+                i++;
+
+            if (i != 128) {
+                // Suffering kuli
+
+                // writeSector(&(node_fs_buffer.nodes[0]),  FS_NODE_SECTOR_NUMBER);
+                // writeSector(&(node_fs_buffer.nodes[32]), FS_NODE_SECTOR_NUMBER + 1);
+            }
+            else
+                printString("mv: invalid destination\r\n");
+        }
         else if (!strcmp(input_buffer, "cp")) {
             byte cp_buf[8192];
             struct file_metadata meta_temp;
             enum fs_retcode ret_code;
-            int i = 0;
+            i = 0;
             for (i = 0; i < 8192; i++)
                 cp_buf[i] = 0;
 
@@ -452,10 +473,19 @@ void shell() {
 
                 if (i != 128) {
                     meta_temp.node_name = input_buffer + 3 + i + 1;
-                    meta_temp.filesize  = 8192;
                     write(&meta_temp, &ret_code);
 
-                    if (ret_code != FS_SUCCESS)
+                    if (ret_code == FS_W_FILE_ALREADY_EXIST)
+                        printString("cp: filename exist\r\n");
+                    else if (ret_code == FS_W_NOT_ENOUGH_STORAGE)
+                        printString("cp: not enough storage\r\n");
+                    else if (ret_code == FS_W_MAXIMUM_NODE_ENTRY)
+                        printString("cp: max node entry\r\n");
+                    else if (ret_code == FS_W_MAXIMUM_SECTOR_ENTRY)
+                        printString("cp: max sectors entry\r\n");
+                    else if (ret_code == FS_W_INVALID_FOLDER)
+                        printString("cp: invalid folder\r\n");
+                    else if (ret_code != FS_SUCCESS)
                         printString("cp: write error\r\n");
                 }
                 else
