@@ -38,10 +38,11 @@ stdlib:
 run:
 	sudo bochs -f src/config/if2230.config
 
-build-run: all run
+build-run: all shell run
 
 shell:
 	bcc -ansi -c -o out/other/shell.o src/c/shell.c
 	bcc -ansi -c -o out/other/string.o src/c/string.c
 	nasm -f as86 src/asm/interrupt.asm -o out/lib_interrupt.o
 	ld86 -o out/shell -d out/other/shell.o out/lib_interrupt.o out/other/string.o
+	cd out; ./tc_gen S

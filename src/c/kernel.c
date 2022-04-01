@@ -13,25 +13,10 @@ struct message {
 };
 
 int main() {
-    fillKernelMap();
     makeInterrupt21();
     clearScreen();
 
     shell();
-}
-
-void fillKernelMap() {
-    struct map_filesystem map_fs_buffer;
-    int i;
-
-    readSector(&map_fs_buffer, FS_MAP_SECTOR_NUMBER);
-    for (i = 0; i < 16; i++)
-        map_fs_buffer.is_filled[i] = true;
-
-    for (i = 256; i < 512; i++)
-        map_fs_buffer.is_filled[i] = true;
-
-    writeSector(&map_fs_buffer, FS_MAP_SECTOR_NUMBER);
 }
 
 void clearScreen() {

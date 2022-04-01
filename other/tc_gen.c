@@ -72,6 +72,13 @@ void shell(byte buf[2880][512]) {
     insert_file(buf, "shell", 0);
 }
 
+void init(byte buf[2880][512]) {
+    for (int i = 0; i < 16; i++)
+        buf[0x100][i] = 1;
+    for (int i = 256; i < 512; i++)
+        buf[0x100][i] = 1;
+}
+
 int main(int argc, char const *argv[]) {
     if (argc < 2) {
         fprintf(stderr, "Usage : tester <test case>\n");
@@ -94,6 +101,7 @@ int main(int argc, char const *argv[]) {
     fclose(image);
     image = fopen(NAMA_IMAGE, "wb");
 
+    init(imagebuffer);
     switch (argv[1][0]) {
         case 'A':
             tc_A(imagebuffer);
