@@ -67,7 +67,9 @@ void tc_D(byte buf[2880][512]) {
     }
 }
 
-
+void shell(byte buf[2880][512]) {
+    insert_file(buf, "shell", 0xFF);
+}
 
 int main(int argc, char const *argv[]) {
     if (argc < 2) {
@@ -103,6 +105,9 @@ int main(int argc, char const *argv[]) {
             break;
         case 'D':
             tc_D(imagebuffer);
+            break;
+        case 'S':
+            shell(imagebuffer);
             break;
     }
 

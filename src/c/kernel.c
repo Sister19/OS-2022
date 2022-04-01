@@ -564,6 +564,13 @@ void shell() {
             readSector(&(node_fs_buffer.nodes[0]),  FS_NODE_SECTOR_NUMBER);
             readSector(&(node_fs_buffer.nodes[32]), FS_NODE_SECTOR_NUMBER + 1);
         }
+        else if (!strcmp(input_buffer, "test")) {
+            struct file_metadata meta;
+            struct exec_retcode retcode;
+            meta.node_name    = "shell";
+            meta.parent_index = 0xFF;
+            executeProgram(&meta, 0x2000, &retcode);
+        }
         else
             printString("Unknown command\r\n");
     }
@@ -591,7 +598,31 @@ void handleInterrupt21(int AX, int BX, int CX, int DX) {
         case 0x5:
             write(BX, CX);
             break;
+        case 0x6:
+            executeProgram(BX, CX, DX);
+            break;
         default:
             printString("Invalid Interrupt");
     }
+}
+
+void executeProgram(struct file_metadata *metadata, int segment, enum exec_retcode *retcode) {
+    enum fs_retcode fs_ret;
+    byte buf[8192];
+
+    metadata->buffer = buf;
+    read(metadata, &fs_ret);
+    if (fs_ret == FS_SUCCESS) {
+        int i = 0;
+        for (i = 0; i < 8192; i++) {
+            if (i < metadata->filesize)
+                putInMemory(segment, i, metadata->buffer[i]);
+            else
+                putInMemory(segment, i, 0x00);
+        }
+        launchProgram(segment);
+        *retcode = EXEC_SUCCESS;
+    }
+    else
+        *retcode = EXEC_FAILED;
 }
