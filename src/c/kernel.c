@@ -4,6 +4,14 @@
 #include "header/std_opr.h"
 
 
+struct message {
+    byte current_directory;
+    char arg1[64];
+    char arg2[64];
+    char arg3[64];
+    byte other[319];
+};
+
 int main() {
     fillKernelMap();
     makeInterrupt21();
@@ -566,10 +574,9 @@ void shell() {
         }
         else if (!strcmp(input_buffer, "test")) {
             struct file_metadata meta;
-            struct exec_retcode retcode;
             meta.node_name    = "shell";
-            meta.parent_index = 0xFF;
-            executeProgram(&meta, 0x2000, &retcode);
+            meta.parent_index = 0x0;
+            executeProgram(&meta, 0x2000);
         }
         else
             printString("Unknown command\r\n");
@@ -606,7 +613,7 @@ void handleInterrupt21(int AX, int BX, int CX, int DX) {
     }
 }
 
-void executeProgram(struct file_metadata *metadata, int segment, enum exec_retcode *retcode) {
+void executeProgram(struct file_metadata *metadata, int segment) {
     enum fs_retcode fs_ret;
     byte buf[8192];
 
@@ -621,8 +628,7 @@ void executeProgram(struct file_metadata *metadata, int segment, enum exec_retco
                 putInMemory(segment, i, 0x00);
         }
         launchProgram(segment);
-        *retcode = EXEC_SUCCESS;
     }
     else
-        *retcode = EXEC_FAILED;
+        printString("exec: file not found\r\n");
 }
