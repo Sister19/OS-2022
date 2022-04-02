@@ -18,7 +18,7 @@ int main() {
     setPIT();
 
     while (true) {
-        sleep();
+        sleep(1);
         printString("abc ");
     }
 
