@@ -1,31 +1,29 @@
 ; Tim Asisten Sister 19 - Last modified : April 2022
 global _setPIT
-global _sleep
+global _usleep
+extern _contextSwitch
+extern _counter
 
-countdown: dw 0x1
-
-_sleep:
+_usleep:
     push bp
     mov bp, sp
     push ax
     push bx
     mov ax, [bp + 4]
-    mov bx, 225
-    mul bx
-    mov [countdown], ax
-loop:
+    mov [_counter], ax
+.loop:
     cli
-    mov ax, [countdown]
+    mov ax, [_counter]
     or ax, ax
-    jz done
+    jz .done
     sti
     nop
     nop
     nop
     nop
     nop
-    jmp loop
-done:
+    jmp .loop
+.done:
     sti
     pop bx
     pop ax
@@ -38,12 +36,12 @@ _setPIT:
     pushad
     pushfd
 
-    ; Channel 0 / lohibyte / hardware re-triggerable one-shot / 16 bit
+    ; Channel 0 / lohibyte / rate generator / 16 bit
     mov al, 0b00_11_010_0
     out 0x43, al
 
-    ; Send frequency value, 1193182 / 0xe90b = 20 hz
-    ; FIXME : For some reason 0xe90b = ~225 hz
+    ; Send frequency value, 1193182 / 0xe90b = ~20 hz
+    ; NOTE : Dependent on emulator clock speed and ips
     mov ax, 0xE90B
     out 0x40, al
     mov al, ah
@@ -66,12 +64,12 @@ makeInterrupt8:
 	ret
 
 
-; Interrupt handler, decrement global variable count, if zero call function
+; IRQ 0 Handler
 IRQ0Handler:
     push ax
     push bx
 
-    call TimerIRQ
+    call _contextSwitch
 
     mov al, 1
     mov al, 0x20
@@ -80,18 +78,3 @@ IRQ0Handler:
     pop bx
     pop ax
     iret
-
-TimerIRQ:
-    push ax
-    mov ax, [countdown]
-    or ax, ax
-    jnz .tdone
-
-    jmp .tret
-.tdone:
-    mov ax, [countdown]
-    dec ax
-    mov [countdown], ax
-.tret:
-    pop ax
-    ret

@@ -3,14 +3,7 @@
 #include "header/std_datatype.h"
 #include "header/std_opr.h"
 
-
-struct message {
-    byte current_directory;
-    char arg1[64];
-    char arg2[64];
-    char arg3[64];
-    byte other[319];
-};
+int counter = 1;
 
 int main() {
     makeInterrupt21();
@@ -18,11 +11,16 @@ int main() {
     setPIT();
 
     while (true) {
-        sleep(1);
         printString("abc ");
+        sleep(1);
     }
 
     shell();
+}
+
+void contextSwitch() {
+    if (counter > 0)
+        counter--;
 }
 
 void clearScreen() {
@@ -359,7 +357,6 @@ void shell() {
     readSector(&(node_fs_buffer.nodes[32]), FS_NODE_SECTOR_NUMBER + 1);
 
     while (true) {
-        // setPIT();
         clear(input_buffer, 128);
         clear(dir_str_buffer, 128);
         printString("OS@IF2230:");
@@ -623,4 +620,8 @@ void executeProgram(struct file_metadata *metadata, int segment) {
     }
     else
         printString("exec: file not found\r\n");
+}
+
+void sleep(int second) {
+    usleep(20*second);
 }
