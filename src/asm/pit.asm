@@ -10,60 +10,59 @@ global _setPIT
 ;     ret
 
 extern _printString
-count: dw 0x6000
+count: dw 0x1
 
 timer_frac: dw 0x1
 timer_ms:   dw 0x1
 
 _setPIT:
-    cli
     call makeInterrupt8
     pushad
     pushfd
-    mov bx, 0xFFFF
 
+    ; Channel 0 / lohibyte / hardware re-triggerable one-shot / 16 bit
     mov al, 0b00_11_010_0
     out 0x43, al
 
-    mov ax, 0xFFFF
+    ; Send frequency value, 3579545 / 0xE90B = 60.00 hz < not this
+    ; Send frequency value, 1193182 / 0xFFFF = 18.20 hz < this
+    ; FIXME : For some reason 0xe90b = ~225 hz
+    mov ax, 0xE90B
     out 0x40, al
     mov al, ah
     out 0x40, al
 
     popfd
     popad
-    sti
     ret
 
 
 makeInterrupt8:
-	;get the address of the service routine
-	mov dx,irqhandler
+	mov dx, IRQ0Handler
 	push ds
-	mov ax, 0	;interrupts are in lowest memory
-	mov ds,ax
-	mov si,0x20	;interrupt 0x21 vector (21 * 4 = 84)
-	mov ax,cs	;have interrupt go to the current segment
-	mov [si+2],ax
-	mov [si],dx	;set up our vector
+	mov ax, 0
+	mov ds, ax
+	mov si, 0x20
+	mov ax, cs
+	mov [si+2], ax
+	mov [si], dx
 	pop ds
 	ret
 
 
 
-irqhandler:
+IRQ0Handler:
     push ax
     push bx
-
-    mov ax, 1
-    mov bx, 1
-    add [timer_frac], ax
-    adc [timer_ms], ax
+    ; call _printString
+    ; mov ax, 1
+    ; mov bx, 1
+    ; add [timer_frac], ax
+    ; adc [timer_ms], ax
+    call TimerIRQ
 
     mov al, 0x20
     out 0x20, al
-
-    ; mov
 
     pop bx
     pop ax
@@ -74,13 +73,13 @@ _sleep:
     push bp
     mov bp, sp
     push ax
-    mov ax, 0x100
+    mov ax, 225
     mov [count], ax
 loop:
     cli
     mov ax, [count]
-    xor ax, ax
-    jz sdone
+    or ax, ax
+    jz done
     sti
     nop
     nop
@@ -88,21 +87,22 @@ loop:
     nop
     nop
     jmp loop
-sdone:
+done:
     sti
     pop ax
     pop bp
     ret
 
-global TimerIRQ
+; global TimerIRQ
+; memory storing problem too, use data
 TimerIRQ:
     push ax
     mov ax, [count]
-    xor eax, eax
-    jz done
+    or ax, ax
+    jz .tdone
     mov ax, [count]
     dec ax
     mov [count], ax
-done:
+.tdone:
     pop ax
     ret

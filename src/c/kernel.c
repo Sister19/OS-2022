@@ -16,7 +16,11 @@ int main() {
     makeInterrupt21();
     clearScreen();
     setPIT();
-    sleep();
+
+    while (true) {
+        sleep();
+        printString("abc ");
+    }
 
     shell();
 }
