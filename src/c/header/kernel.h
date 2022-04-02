@@ -7,6 +7,8 @@ extern void putInMemory(int segment, int address, byte b);
 extern int interrupt(int int_number, int AX, int BX, int CX, int DX);
 extern void makeInterrupt21();
 extern void launchProgram(int segment);
+extern void setPIT();
+extern void sleep();
 
 void fillKernelMap();
 void handleInterrupt21(int AX, int BX, int CX, int DX);

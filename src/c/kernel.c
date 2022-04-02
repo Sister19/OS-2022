@@ -15,6 +15,8 @@ struct message {
 int main() {
     makeInterrupt21();
     clearScreen();
+    setPIT();
+    sleep();
 
     shell();
 }
@@ -353,6 +355,7 @@ void shell() {
     readSector(&(node_fs_buffer.nodes[32]), FS_NODE_SECTOR_NUMBER + 1);
 
     while (true) {
+        // setPIT();
         clear(input_buffer, 128);
         clear(dir_str_buffer, 128);
         printString("OS@IF2230:");

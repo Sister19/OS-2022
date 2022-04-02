@@ -17,7 +17,7 @@ bootloader:
 	nasm src/asm/bootloader.asm -o out/bootloader;
 	dd if=out/bootloader of=out/system.img bs=512 count=1 conv=notrunc status=noxfer
 
-kernel:
+kernel: pit
 	# -- Source Compilation --
 	bcc -ansi -c -o out/kernel.o src/c/kernel.c
 	nasm -f as86 src/asm/kernel.asm -o out/kernel_asm.o
@@ -46,3 +46,6 @@ shell:
 	nasm -f as86 src/asm/interrupt.asm -o out/lib_interrupt.o
 	ld86 -o out/shell -d out/other/shell.o out/lib_interrupt.o out/other/string.o
 	cd out; ./tc_gen S
+
+pit:
+	nasm -f as86 src/asm/pit.asm -o out/lib_pit.o
