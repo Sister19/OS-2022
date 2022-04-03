@@ -10,6 +10,8 @@ global _launchProgram
 global _getCurrentDataSegment
 global _useKernelDataMemory
 global _setDataSegment
+global _getRegisterState
+global _setRegisterState
 extern _handleInterrupt21
 
 
@@ -83,6 +85,44 @@ _setDataSegment:
 	mov ds, ax
 	pop ax
 	pop bp
+	ret
+
+_getRegisterState:
+	push bp
+	mov bp, sp
+	push ax
+	push si
+	mov si, [bp+4]   ; PCB Address
+
+	mov ax, 0x4142
+	mov [si], ax
+	mov ax, 0x4344
+	mov [si+2], ax
+
+	mov ax, 0x4546
+	mov [si+4], ax
+	mov ax, 0x4748
+	mov [si+6], ax
+	mov ax, 0x494A
+	mov [si+8], ax
+	mov ax, 0x4B4C
+	mov [si+10], ax
+
+
+	pop si
+	pop ax
+	pop bp
+	ret
+
+_setRegisterState:
+
+	ret
+
+
+_getCurrentIP:
+	call .nx
+.nx:
+	pop ax
 	ret
 
 

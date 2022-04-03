@@ -3,38 +3,67 @@
 #include "header/std_datatype.h"
 #include "header/std_opr.h"
 
+
 struct process_control_block {
-    byte next_index;
+    int segment;
+    int ip;
+
     int ax;
     int bx;
     int cx;
     int dx;
-
-    int ds;
-    int ip;
 };
+
+extern void getRegisterState(struct process_control_block *pcb);
+
+int valid_pcb_ctr = 0;
 
 struct process_control_block pcb[4];
 
 int sleep_ctr = 0;
 int ctx_ctr   = 1;
 
-void set_pcb();
-
 int main() {
     makeInterrupt21();
     clearScreen();
     setPIT();
-    set_pcb();
 
     shell();
 }
 
-void set_pcb() {
-    int i;
-    for (i = 0; i < 4; i++)
-        pcb[i].next_index = 0;
+void strrev(char *string) {
+    int i = 0, length = strlen(string);
+    char temp;
+    while (i < length/2) {
+        temp = string[i];
+        string[i] = string[length - 1 - i];
+        string[length - 1 - i] = temp;
+        i++;
+    }
 }
+
+void inttostr(char *buffer, int n) {
+    int i = 0;
+    bool is_negative = false;
+    if (n < 0) {
+        n *= -1;
+        is_negative = true;
+    }
+    while (n > 10) {
+        buffer[i] = '0' + mod(n, 10);
+        i++;
+        n /= 10;
+    }
+    buffer[i] = '0' + mod(n, 10); // First digit
+    i++;
+    if (is_negative) {
+        buffer[i] = '-';
+        i++;
+    }
+    buffer[i] = '\0';
+    strrev(buffer);
+}
+
 
 void multiexec() {
     struct file_metadata metadata;
@@ -72,43 +101,37 @@ void multiexec() {
             putInMemory(0x6000, i, 0x00);
     }
 
+    valid_pcb_ctr = 3;
+    pcb[0].segment = 0x4000;
+    pcb[1].segment = 0x5000;
+    pcb[2].segment = 0x6000;
+
+    getRegisterState(&(pcb[0]));
+    {
+        char a[16];
+        inttostr(a, pcb[0].segment);
+        printString(a);
+        printString("\r\n");
+        inttostr(a, pcb[0].ip);
+        printString(a);
+        printString("\r\n");
+        inttostr(a, pcb[0].ax);
+        printString(a);
+        printString("\r\n");
+        inttostr(a, pcb[0].bx);
+        printString(a);
+        printString("\r\n");
+        inttostr(a, pcb[0].cx);
+        printString(a);
+        printString("\r\n");
+        inttostr(a, pcb[0].dx);
+        printString(a);
+        printString("\r\n");
+    }
+
     // launchProgram(segment);
 }
 
-void strrev(char*);
-
-void inttostr(char *buffer, int n) {
-    int i = 0;
-    bool is_negative = false;
-    if (n < 0) {
-        n *= -1;
-        is_negative = true;
-    }
-    while (n > 10) {
-        buffer[i] = '0' + mod(n, 10);
-        i++;
-        n /= 10;
-    }
-    buffer[i] = '0' + mod(n, 10); // First digit
-    i++;
-    if (is_negative) {
-        buffer[i] = '-';
-        i++;
-    }
-    buffer[i] = '\0';
-    strrev(buffer);
-}
-
-void strrev(char *string) {
-    int i = 0, length = strlen(string);
-    char temp;
-    while (i < length/2) {
-        temp = string[i];
-        string[i] = string[length - 1 - i];
-        string[length - 1 - i] = temp;
-        i++;
-    }
-}
 
 void contextSwitch() {
     int current_segment;
@@ -120,7 +143,9 @@ void contextSwitch() {
         useKernelDataMemory();
         if (ctx_ctr <= 0) {
 
-            printString("ok\r\n");
+
+
+            // printString("ok\r\n");
             ctx_ctr++;
         }
         setDataSegment(current_segment);
