@@ -55,41 +55,24 @@ void strrev(char *string) {
 }
 
 void contextSwitch() {
-    if (counter > 0)
-        counter--;
-    else {
-        int cur_seg = getCurrentDataSegment();
-        if (cur_seg >= 0x3000) {
-            char a[16];
-            int i;
-            int last_segment = cur_seg;
-            // useKernelDataMemory();
-            // useKernelDataMemory();
-            for (i = 0; i < 16; i++)
-                a[i] = 0;
-            inttostr(a, last_segment);
-            printString(a);
-            printString("\r\n");
-            // while (last_segment == 0x1000);
-            // while (counter-1 == 10);
-            // counter++;
-            // printString("ok");
-            // if (sleep_ctr > 0)
-            //     sleep_ctr--;
-            //
-            // if (counter > 0) {
-                //     // counter--;
-                // }
-                // else {
-                    //     // printString("ok\r\n");
-                    //     printString("trigger\r\n");
-                    //     // counter++;
-                    //     // if current_pcb.segment != 0, 1, 2
-                    //     // if (current_segment)
-                    // }
+    int cur_seg;
+    if (sleep_ctr > 0)
+        sleep_ctr--;
 
-            setDataSegment(last_segment);
+    cur_seg = getCurrentDataSegment();
+    if (cur_seg >= 0x8000) {
+        useKernelDataMemory();
+        if (counter <= 0) {
+            int last_segment = cur_seg;
+
+
+            printString("ok\r\n");
+            counter++;
+
+            // if current_pcb.segment != 0, 1, 2
         }
+
+        setDataSegment(cur_seg);
     }
 }
 
@@ -635,7 +618,7 @@ void shell() {
             struct file_metadata meta;
             meta.node_name    = "shell";
             meta.parent_index = 0x0;
-            executeProgram(&meta, 0x3000);
+            executeProgram(&meta, 0x8000);
         }
         else
             printString("Unknown command\r\n");
@@ -668,11 +651,16 @@ void handleInterrupt21(int AX, int BX, int CX, int DX) {
             executeProgram(BX, CX, DX);
             break;
 
+
+        case 0x7:
+            sleep(BX);
+            break;
         case 0x8:
+            // DEBUG
             useKernelDataMemory();
             printString("reduced\r\n");
             counter--;
-            setDataSegment(0x3000);
+            setDataSegment(0x8000);
             printString(BX);
             break;
         default:
