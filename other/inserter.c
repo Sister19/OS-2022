@@ -220,7 +220,7 @@ void insert_file(byte buf[2880][512], char *fname, byte parent_idx) {
     metadata.node_name = filename;
 
     metadata.file_ptr = ptr;
-    byte temp[8190];
+    byte temp[8192];
     fread(temp, 8192, 1, ptr);
     metadata.filesize = ftell(ptr);
     fclose(ptr);
