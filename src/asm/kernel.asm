@@ -76,11 +76,6 @@ _useKernelDataMemory:
 	ret
 
 _setDataSegment:
-	; push ax
-	; mov ax, 0x1000
-	; mov ds, ax
-	; pop ax
-	; ret
 	push bp
 	mov bp, sp
 	push ax

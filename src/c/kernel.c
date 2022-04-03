@@ -3,20 +3,76 @@
 #include "header/std_datatype.h"
 #include "header/std_opr.h"
 
-int sleep_ctr = 1;
-int counter = 1;
+struct process_control_block {
+    byte next_index;
+    int ax;
+    int bx;
+    int cx;
+    int dx;
+
+    int ds;
+    int ip;
+};
+
+struct process_control_block pcb[4];
+
+int sleep_ctr = 0;
+int ctx_ctr   = 1;
+
+void set_pcb();
 
 int main() {
     makeInterrupt21();
     clearScreen();
     setPIT();
-
-    // while (true) {
-    //     printString("abc ");
-    //     sleep(4);
-    // }
+    set_pcb();
 
     shell();
+}
+
+void set_pcb() {
+    int i;
+    for (i = 0; i < 4; i++)
+        pcb[i].next_index = 0;
+}
+
+void multiexec() {
+    struct file_metadata metadata;
+    enum fs_retcode fs_ret;
+    byte buf[8192];
+    int i = 0;
+
+    metadata.buffer       = buf;
+    metadata.parent_index = 0xFF;
+
+    metadata.node_name = "s1";
+    read(metadata, &fs_ret);
+    for (i = 0; i < 8192; i++) {
+        if (i < metadata.filesize)
+            putInMemory(0x4000, i, metadata.buffer[i]);
+        else
+            putInMemory(0x4000, i, 0x00);
+    }
+
+    metadata.node_name = "s2";
+    read(metadata, &fs_ret);
+    for (i = 0; i < 8192; i++) {
+        if (i < metadata.filesize)
+            putInMemory(0x5000, i, metadata.buffer[i]);
+        else
+            putInMemory(0x5000, i, 0x00);
+    }
+
+    metadata.node_name = "s3";
+    read(metadata, &fs_ret);
+    for (i = 0; i < 8192; i++) {
+        if (i < metadata.filesize)
+            putInMemory(0x6000, i, metadata.buffer[i]);
+        else
+            putInMemory(0x6000, i, 0x00);
+    }
+
+    // launchProgram(segment);
 }
 
 void strrev(char*);
@@ -55,24 +111,19 @@ void strrev(char *string) {
 }
 
 void contextSwitch() {
-    int cur_seg;
+    int current_segment;
     if (sleep_ctr > 0)
         sleep_ctr--;
 
-    cur_seg = getCurrentDataSegment();
-    if (cur_seg >= 0x8000) {
+    current_segment = getCurrentDataSegment();
+    if (current_segment >= 0x4000 && current_segment < 0x8000) {
         useKernelDataMemory();
-        if (counter <= 0) {
-            int last_segment = cur_seg;
-
+        if (ctx_ctr <= 0) {
 
             printString("ok\r\n");
-            counter++;
-
-            // if current_pcb.segment != 0, 1, 2
+            ctx_ctr++;
         }
-
-        setDataSegment(cur_seg);
+        setDataSegment(current_segment);
     }
 }
 
@@ -616,9 +667,14 @@ void shell() {
         }
         else if (!strcmp(input_buffer, "test")) {
             struct file_metadata meta;
-            meta.node_name    = "shell";
-            meta.parent_index = 0x0;
-            executeProgram(&meta, 0x8000);
+            meta.node_name    = "s2";
+            // meta.node_name    = "shell";
+            // meta.parent_index = 0x0;
+            meta.parent_index = 0xFF;
+            executeProgram(&meta, 0x4000);
+        }
+        else if (!strcmp(input_buffer, "mt")) {
+            multiexec();
         }
         else
             printString("Unknown command\r\n");
@@ -659,8 +715,8 @@ void handleInterrupt21(int AX, int BX, int CX, int DX) {
             // DEBUG
             useKernelDataMemory();
             printString("reduced\r\n");
-            counter--;
-            setDataSegment(0x8000);
+            ctx_ctr--;
+            setDataSegment(0x4000);
             printString(BX);
             break;
         default:
@@ -689,5 +745,8 @@ void executeProgram(struct file_metadata *metadata, int segment) {
 }
 
 void sleep(int second) {
-    usleep(20*second);
+    int last_segment = getCurrentDataSegment();
+    useKernelDataMemory();
+    msleep(20*second);
+    setDataSegment(last_segment);
 }

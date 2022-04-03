@@ -1,10 +1,10 @@
 ; Tim Asisten Sister 19 - Last modified : April 2022
 global _setPIT
-global _usleep
+global _msleep
 extern _contextSwitch
 extern _sleep_ctr
 
-_usleep:
+_msleep:
     push bp
     mov bp, sp
     push ax
@@ -69,7 +69,7 @@ makeInterrupt8:
 IRQ0Handler:
     push ax
     push bx
-    
+
     call _contextSwitch
 
     mov al, 1
