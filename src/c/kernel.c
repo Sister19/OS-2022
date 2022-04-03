@@ -591,7 +591,10 @@ void handleInterrupt21(int AX, int BX, int CX, int DX) {
             write(BX, CX);
             break;
         case 0x6:
-            executeProgram(BX, CX, DX);
+            executeProgram(BX, CX);
+            break;
+        case 0x7:
+            launchProgram(BX);
             break;
         default:
             printString("Invalid Interrupt");
