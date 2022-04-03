@@ -2,7 +2,7 @@
 global _setPIT
 global _usleep
 extern _contextSwitch
-extern _counter
+extern _sleep_ctr
 
 _usleep:
     push bp
@@ -10,10 +10,10 @@ _usleep:
     push ax
     push bx
     mov ax, [bp + 4]
-    mov [_counter], ax
+    mov [_sleep_ctr], ax
 .loop:
     cli
-    mov ax, [_counter]
+    mov ax, [_sleep_ctr]
     or ax, ax
     jz .done
     sti
@@ -49,6 +49,7 @@ _setPIT:
 
     popfd
     popad
+    sti
     ret
 
 makeInterrupt8:
@@ -68,7 +69,7 @@ makeInterrupt8:
 IRQ0Handler:
     push ax
     push bx
-
+    
     call _contextSwitch
 
     mov al, 1

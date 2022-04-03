@@ -17,6 +17,9 @@ extern void makeInterrupt21();
 extern void launchProgram(int segment);
 extern void setPIT();
 extern void usleep(int d);
+extern void useKernelDataMemory();
+extern void setDataSegment(int segment);
+extern int getCurrentDataSegment();
 
 void fillKernelMap();
 void handleInterrupt21(int AX, int BX, int CX, int DX);

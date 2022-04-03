@@ -7,7 +7,12 @@
 global _putInMemory
 global _makeInterrupt21
 global _launchProgram
+global _getCurrentDataSegment
+global _useKernelDataMemory
+global _setDataSegment
 extern _handleInterrupt21
+
+
 
 ;void putInMemory (int segment, int address, char character)
 _putInMemory:
@@ -45,6 +50,7 @@ _makeInterrupt21:
 ;it will call your function:
 ;void handleInterrupt21 (int AX, int BX, int CX, int DX)
 _interrupt21ServiceRoutine:
+	push ds
 	push dx
 	push cx
 	push bx
@@ -54,8 +60,35 @@ _interrupt21ServiceRoutine:
 	pop bx
 	pop cx
 	pop dx
+	pop ds
 
 	iret
+
+_getCurrentDataSegment:
+	mov ax, ds
+	ret
+
+_useKernelDataMemory:
+	push bx
+	mov bx, 0x1000
+	mov ds, bx
+	pop bx
+	ret
+
+_setDataSegment:
+	; push ax
+	; mov ax, 0x1000
+	; mov ds, ax
+	; pop ax
+	; ret
+	push bp
+	mov bp, sp
+	push ax
+	mov ax, [bp+4]
+	mov ds, ax
+	pop ax
+	pop bp
+	ret
 
 
 _launchProgram:

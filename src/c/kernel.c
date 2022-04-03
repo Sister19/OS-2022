@@ -3,6 +3,7 @@
 #include "header/std_datatype.h"
 #include "header/std_opr.h"
 
+int sleep_ctr = 1;
 int counter = 1;
 
 int main() {
@@ -10,17 +11,86 @@ int main() {
     clearScreen();
     setPIT();
 
-    while (true) {
-        printString("abc ");
-        sleep(1);
-    }
+    // while (true) {
+    //     printString("abc ");
+    //     sleep(4);
+    // }
 
     shell();
+}
+
+void strrev(char*);
+
+void inttostr(char *buffer, int n) {
+    int i = 0;
+    bool is_negative = false;
+    if (n < 0) {
+        n *= -1;
+        is_negative = true;
+    }
+    while (n > 10) {
+        buffer[i] = '0' + mod(n, 10);
+        i++;
+        n /= 10;
+    }
+    buffer[i] = '0' + mod(n, 10); // First digit
+    i++;
+    if (is_negative) {
+        buffer[i] = '-';
+        i++;
+    }
+    buffer[i] = '\0';
+    strrev(buffer);
+}
+
+void strrev(char *string) {
+    int i = 0, length = strlen(string);
+    char temp;
+    while (i < length/2) {
+        temp = string[i];
+        string[i] = string[length - 1 - i];
+        string[length - 1 - i] = temp;
+        i++;
+    }
 }
 
 void contextSwitch() {
     if (counter > 0)
         counter--;
+    else {
+        int cur_seg = getCurrentDataSegment();
+        if (cur_seg >= 0x3000) {
+            char a[16];
+            int i;
+            int last_segment = cur_seg;
+            // useKernelDataMemory();
+            // useKernelDataMemory();
+            for (i = 0; i < 16; i++)
+                a[i] = 0;
+            inttostr(a, last_segment);
+            printString(a);
+            printString("\r\n");
+            // while (last_segment == 0x1000);
+            // while (counter-1 == 10);
+            // counter++;
+            // printString("ok");
+            // if (sleep_ctr > 0)
+            //     sleep_ctr--;
+            //
+            // if (counter > 0) {
+                //     // counter--;
+                // }
+                // else {
+                    //     // printString("ok\r\n");
+                    //     printString("trigger\r\n");
+                    //     // counter++;
+                    //     // if current_pcb.segment != 0, 1, 2
+                    //     // if (current_segment)
+                    // }
+
+            setDataSegment(last_segment);
+        }
+    }
 }
 
 void clearScreen() {
@@ -565,7 +635,7 @@ void shell() {
             struct file_metadata meta;
             meta.node_name    = "shell";
             meta.parent_index = 0x0;
-            executeProgram(&meta, 0x2000);
+            executeProgram(&meta, 0x3000);
         }
         else
             printString("Unknown command\r\n");
@@ -597,8 +667,16 @@ void handleInterrupt21(int AX, int BX, int CX, int DX) {
         case 0x6:
             executeProgram(BX, CX, DX);
             break;
+
+        case 0x8:
+            useKernelDataMemory();
+            printString("reduced\r\n");
+            counter--;
+            setDataSegment(0x3000);
+            printString(BX);
+            break;
         default:
-            printString("Invalid Interrupt");
+            printString("Invalid Interrupt");  // Actually uncallable
     }
 }
 
