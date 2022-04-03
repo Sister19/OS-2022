@@ -58,8 +58,7 @@ void writer(byte buf[2880][512], struct file_metadata *metadata) {
         memcpy(&node_buffer, &(buf[0x101][i*16]), 16);
 
         // Cari dan simpan index yang berisikan node kosong pada filesystem node
-        if (node_buffer.sector_entry_index == 0x00
-              && node_buffer.parent_node_index == 0x00
+        if (strlen(node_buffer.name) == 0x00
               && !node_write_index_found) {
             node_write_index  = i;
             node_write_index_found = true;
