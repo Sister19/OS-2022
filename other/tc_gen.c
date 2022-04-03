@@ -72,6 +72,12 @@ void shell(byte buf[2880][512]) {
     insert_file(buf, "shell", 0);
 }
 
+void multi(byte buf[2880][512]) {
+    insert_file(buf, "s1", 0xFF);
+    insert_file(buf, "s2", 0xFF);
+    insert_file(buf, "s3", 0xFF);
+}
+
 void init(byte buf[2880][512]) {
     for (int i = 0; i < 16; i++)
         buf[0x100][i] = 1;
@@ -117,6 +123,9 @@ int main(int argc, char const *argv[]) {
             break;
         case 'S':
             shell(imagebuffer);
+            break;
+        case 'M':
+            multi(imagebuffer);
             break;
     }
 

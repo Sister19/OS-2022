@@ -38,7 +38,7 @@ stdlib:
 run:
 	sudo bochs -f src/config/if2230.config
 
-build-run: all shell run
+build-run: all shell multi run
 
 shell:
 	bcc -ansi -c -o out/other/shell.o src/c/shell.c
@@ -46,6 +46,17 @@ shell:
 	nasm -f as86 src/asm/interrupt.asm -o out/lib_interrupt.o
 	ld86 -o out/shell -d out/other/shell.o out/lib_interrupt.o out/other/string.o
 	cd out; ./tc_gen S
+
+multi:
+	bcc -ansi -c -o out/other/string.o src/c/string.c
+	nasm -f as86 src/asm/interrupt.asm -o out/lib_interrupt.o
+	bcc -ansi -c -o out/other/s1.o src/c/s1.c
+	ld86 -o out/s1 -d out/other/s1.o out/lib_interrupt.o out/other/string.o
+	bcc -ansi -c -o out/other/s2.o src/c/s2.c
+	ld86 -o out/s2 -d out/other/s2.o out/lib_interrupt.o out/other/string.o
+	bcc -ansi -c -o out/other/s3.o src/c/s3.c
+	ld86 -o out/s3 -d out/other/s3.o out/lib_interrupt.o out/other/string.o
+	cd out; ./tc_gen M
 
 pit:
 	nasm -f as86 src/asm/pit.asm -o out/lib_pit.o
