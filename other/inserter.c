@@ -9,6 +9,11 @@ typedef char bool;
 #define true 1
 #define false 0
 
+#define ANSI_RED    "\33\[31m"
+#define ANSI_GREEN  "\33\[32m"
+#define ANSI_ORANGE "\33\[33m"
+#define ANSI_CLEAR  "\33\[m"
+
 struct file_metadata {
     FILE *file_ptr;        // Modified dibandingkan tugas
     char *node_name;
@@ -141,7 +146,7 @@ void writer(byte buf[2880][512], struct file_metadata *metadata) {
         // Menuliskan folder / file
         if (!writing_file) {
             buf[0x101][16*node_write_index + 1] = 0xFF;
-            printf("Writer : Folder %s created\n", metadata->node_name);
+            printf(ANSI_GREEN "writer : Folder %s created\n" ANSI_CLEAR, metadata->node_name);
         }
         else {
             bool writing_completed = false;
@@ -151,7 +156,7 @@ void writer(byte buf[2880][512], struct file_metadata *metadata) {
 
             for (i = 0; i < 512 && !writing_completed; i++) {
                 if (buf[0x100][i] == 0) {
-                    buf[0x100][i] = 1;
+                    buf[0x100][i]     = 1;
                     written_filesize += 512;
 
                     buf[0x103][16*sector_write_index + j] = i;
@@ -169,23 +174,21 @@ void writer(byte buf[2880][512], struct file_metadata *metadata) {
                     writing_completed = true;
             }
 
-            printf("Writer : Writing %s completed (%d bytes)\n", metadata->node_name, metadata->filesize);
+            printf(ANSI_GREEN "writer : Writing %s completed (%d bytes)\n" ANSI_CLEAR, metadata->node_name, metadata->filesize);
         }
-
-        // Update filesystem tidak diperlukan
     }
 
     // Tahap 7 : Return code error
     if (!unique_filename)
-        fprintf(stderr, "Error : Name already exist\n");
+        fprintf(stderr, ANSI_RED "writer : %s already exist in parent index 0x%x\n" ANSI_CLEAR, metadata->node_name, metadata->parent_index);
     else if (!node_write_index_found)
-        fprintf(stderr, "Error : Maximum node entry reached\n");
+        fprintf(stderr, ANSI_RED "writer : Maximum node entry reached\n" ANSI_CLEAR);
     else if (writing_file && !sector_write_index_found)
-        fprintf(stderr, "Error : Maximum sector entry reached\n");
+        fprintf(stderr, ANSI_RED "writer : Maximum sector entry reached\n" ANSI_CLEAR);
     else if (invalid_parent_index)
-        fprintf(stderr, "Error : Invalid parent index\n");
+        fprintf(stderr, ANSI_RED "writer : Invalid parent index (0x%x)\n" ANSI_CLEAR, metadata->parent_index);
     else if (!enough_empty_space)
-        fprintf(stderr, "Error : Not enough space\n");
+        fprintf(stderr, ANSI_RED "writer : Not enough space (filesize %d bytes)\n" ANSI_CLEAR, metadata->filesize);
 }
 
 
@@ -198,7 +201,7 @@ void insert_file(byte buf[2880][512], char *fname, byte parent_idx) {
 
     FILE *ptr = fopen(fname, "rb");
     if (ptr == NULL) {
-        fprintf(stderr, "Error : \"%s\" not found\n", fname);
+        fprintf(stderr, ANSI_RED "insert_file : \"%s\" not found\n" ANSI_CLEAR, fname);
         return;
     }
 
