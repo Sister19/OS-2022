@@ -89,42 +89,47 @@ _setDataSegment:
 
 _getRegisterState:
 	push bp
+	jmp 0x0000:0x4230
 	mov bp, sp
 	push ax
-	push si
-	mov si, [bp+4]   ; PCB Address
-
-	mov ax, 0x4142
-	mov [si], ax
-	mov ax, 0x4344
-	mov [si+2], ax
-
-	mov ax, 0x4546
-	mov [si+4], ax
-	mov ax, 0x4748
-	mov [si+6], ax
-	mov ax, 0x494A
-	mov [si+8], ax
-	mov ax, 0x4B4C
-	mov [si+10], ax
-
-
-	pop si
-	pop ax
-	pop bp
+	; push si
+	; mov si, [bp+4]   ; PCB Address
+	;
+	; ; Get general purpose register
+	; mov [si+4], ax
+	; mov [si+6], bx
+	; mov [si+8], cx
+	; mov [si+10], dx
+	;
+	; ; Get data and stack register
+	; mov [si+12], di
+	; mov [si+14], bp
+	; mov [si+16], sp
+	;
+	; ; Get ip from INT
+	; mov ax, [bp+4] ; hard
+	; mov [si+2], ax
+	;
+	; pop si
+	; pop ax
+	; pop bp
 	ret
 
 _setRegisterState:
+	push bp
+	mov bp, sp
+	push si
+	mov si, [bp+4]   ; PCB Address
 
+	; Set general purpose register
+	mov ax, [si+4]
+	mov bx, [si+6]
+	mov cx, [si+8]
+	mov dx, [si+10]
+
+	pop si
+	pop bp
 	ret
-
-
-_getCurrentIP:
-	call .nx
-.nx:
-	pop ax
-	ret
-
 
 _launchProgram:
   mov bp,sp

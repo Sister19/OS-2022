@@ -12,9 +12,15 @@ struct process_control_block {
     int bx;
     int cx;
     int dx;
+
+    int si;
+    int di;
+
+    int bp;
+    int sp;
 };
 
-extern void getRegisterState(struct process_control_block *pcb);
+extern void getRegisterState(struct process_control_block *pcb); // Selain segment
 
 int valid_pcb_ctr = 0;
 
@@ -106,29 +112,6 @@ void multiexec() {
     pcb[1].segment = 0x5000;
     pcb[2].segment = 0x6000;
 
-    getRegisterState(&(pcb[0]));
-    {
-        char a[16];
-        inttostr(a, pcb[0].segment);
-        printString(a);
-        printString("\r\n");
-        inttostr(a, pcb[0].ip);
-        printString(a);
-        printString("\r\n");
-        inttostr(a, pcb[0].ax);
-        printString(a);
-        printString("\r\n");
-        inttostr(a, pcb[0].bx);
-        printString(a);
-        printString("\r\n");
-        inttostr(a, pcb[0].cx);
-        printString(a);
-        printString("\r\n");
-        inttostr(a, pcb[0].dx);
-        printString(a);
-        printString("\r\n");
-    }
-
     // launchProgram(segment);
 }
 
@@ -140,12 +123,31 @@ void contextSwitch() {
 
     current_segment = getCurrentDataSegment();
     if (current_segment >= 0x4000 && current_segment < 0x8000) {
+        getRegisterState(&(pcb[0]));
         useKernelDataMemory();
         if (ctx_ctr <= 0) {
+            {
+                char a[16];
+                inttostr(a, pcb[0].segment);
+                printString(a);
+                printString("\r\n");
+                inttostr(a, pcb[0].ip);
+                printString(a);
+                printString("\r\n");
+                inttostr(a, pcb[0].ax);
+                printString(a);
+                printString("\r\n");
+                inttostr(a, pcb[0].bx);
+                printString(a);
+                printString("\r\n");
+                inttostr(a, pcb[0].cx);
+                printString(a);
+                printString("\r\n");
+                inttostr(a, pcb[0].dx);
+                printString(a);
+                printString("\r\n");
+            }
 
-
-
-            // printString("ok\r\n");
             ctx_ctr++;
         }
         setDataSegment(current_segment);
@@ -700,6 +702,10 @@ void shell() {
         }
         else if (!strcmp(input_buffer, "mt")) {
             multiexec();
+        }
+        else if (!strcmp(input_buffer, "aaa")) {
+            ctx_ctr--;
+            sleep(1);
         }
         else
             printString("Unknown command\r\n");

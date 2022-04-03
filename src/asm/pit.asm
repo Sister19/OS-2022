@@ -70,11 +70,11 @@ IRQ0Handler:
     push ax
     push bx
 
-    call _contextSwitch
-
     mov al, 1
     mov al, 0x20
     out 0x20, al
+
+    call _contextSwitch
 
     pop bx
     pop ax
